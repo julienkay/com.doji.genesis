@@ -46,6 +46,7 @@ Shader "AssetForger/EquirectDepth" {
 
                 o.vertex = UnityObjectToClipPos(v.vertex * depth);
 
+                // clamp to far clip plane (assumes reversed-Z)
                 if (o.vertex.z < 1.0e-3f) {
                     o.vertex.z = 1.0e-3f;
                 }

@@ -7,6 +7,18 @@ using System.Text;
 
 namespace AssetForger.Utilities {
 
+    public enum HTTPVerb { GET, POST };
+
+    public struct Result<T> {
+        public T Value;
+        public string Error;
+
+        public Result(T value, string error) {
+            Value = value;
+            Error = error;
+        }
+    }
+
     public static class WebRequestAsyncUtility {
 
         public static class WebRequestAsync<T> {
@@ -16,11 +28,12 @@ namespace AssetForger.Utilities {
             /// object of type <typeparamref name="T"/> and is automatically being deserialized and returned.
             /// </summary>
             /// <typeparam name="T">the type that this web request returns.</typeparam>
-            public static async Task<T> SendWebRequestAsync(string url, HTTPVerb verb = HTTPVerb.GET, string postData = null, params Tuple<string, string>[] requestHeaders) {
+            public static async Task<Result<T>> SendWebRequestAsync(string url, HTTPVerb verb = HTTPVerb.GET, string postData = null, params Tuple<string, string>[] requestHeaders) {
                 UnityWebRequest wr = GetRequest(url, verb, postData, requestHeaders);
                 if (wr == null) {
                     return default;
                 }
+                Result<T> result = new Result<T>();
 
                 try {
                     var asyncOp = wr.SendWebRequest();
@@ -32,23 +45,25 @@ namespace AssetForger.Utilities {
                         case UnityWebRequest.Result.InProgress:
                             break;
                         case UnityWebRequest.Result.Success:
-                            return JsonConvert.DeserializeObject<T>(asyncOp.webRequest.downloadHandler.text);
+                            T resultJson = JsonConvert.DeserializeObject<T>(asyncOp.webRequest.downloadHandler.text);
+                            result.Value = resultJson;
+                            break;
                         case UnityWebRequest.Result.ConnectionError:
                         case UnityWebRequest.Result.ProtocolError:
                         case UnityWebRequest.Result.DataProcessingError:
                             Debug.LogError($"{asyncOp.webRequest.result}: {asyncOp.webRequest.error}\nURL: {asyncOp.webRequest.url}");
                             Debug.LogError($"{asyncOp.webRequest.downloadHandler.text}");
+                            result.Error = asyncOp.webRequest.error;
                             break;
                         default:
                             break;
                     }
-
                 } catch (Exception e) {
                     Debug.LogError(e);
                 } finally {
                     wr.Dispose();
                 }
-                return default;
+                return result;
             }
         }
 
