@@ -2,6 +2,10 @@ Shader "AssetForger/EquirectDepth" {
     Properties {
         _MainTex ("Texture", 2D) = "white" {}
         _Depth("Depth", 2D) = "white" {}
+        _Min("Min Depth", Range(0.0, 10000.0)) = 0.0
+        _Max("Max Depth", Range(0.0, 10000.0)) = 1000.0
+        _DepthMultiplier("Depth Exaggeration", Range(0.0, 1.0)) = 0.01
+        _LogNorm("Log Normalization Factor", Range(0.0, 2.0)) = 1
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -17,8 +21,21 @@ Shader "AssetForger/EquirectDepth" {
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
-            sampler2D_float _Depth;
-            //float4 _MainTex_ST;
+            sampler2D _Depth;
+            
+            // Minimum recorded depth
+            float _Min;
+
+            // Maximum recorded depth
+            float _Max;
+
+            // Depth Exaggeration
+            float _DepthMultiplier;
+
+            // Log-Normalization factor
+            float _LogNorm;
+
+            int _SwapChannels;
 
             struct appdata {
                 float4 vertex : POSITION;
@@ -39,12 +56,12 @@ Shader "AssetForger/EquirectDepth" {
                 UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
+                // Newer versions of Barracuda mess up the X and Y directions. Therefore the UV has to be swapped
+                float2 uv = v.uv.yx;
+                uv.x = 1 - uv.x;
                 // Vertex displacement (assumes unit sphere with radius 1)
-                float2 uv = v.uv;
-                uv.y = 1 - uv.y;
-                float depth = tex2Dlod(_Depth, float4(uv, 0, 0)).r;
-
-                o.vertex = UnityObjectToClipPos(v.vertex * depth);
+                float depth = clamp(_Max- tex2Dlod(_Depth, float4(uv, 0, 0)), 0, _Max);
+                o.vertex = UnityObjectToClipPos(v.vertex * depth * _DepthMultiplier);
 
                 // clamp to far clip plane (assumes reversed-Z)
                 if (o.vertex.z < 1.0e-3f) {
@@ -56,9 +73,11 @@ Shader "AssetForger/EquirectDepth" {
             }
 
             fixed4 frag (v2f i) : SV_Target {
-                float2 uv = i.uv;
-                uv.x = 1 - uv.x;
-                fixed4 col = tex2D(_MainTex, uv);
+                float4 col;
+                // The color texture is sampled normally, so we have to flip the coordinates back
+                float2 uv = lerp(i.uv, float2(1 - i.uv.y, 1 - i.uv.x), _SwapChannels);
+
+                col = tex2D(_MainTex, uv);
                 return col;
             }
             ENDCG
