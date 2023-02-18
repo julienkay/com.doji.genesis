@@ -1,0 +1,25 @@
+{
+    "name": "Doji.Genesis",
+    "rootNamespace": "",
+    "references": [
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:5c2b5ba89f9e74e418232e154bc5cc7a",
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:e0cd26848372d4e5c891c569017e11f1"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.barracuda",
+            "expression": "1.0.5",
+            "define": "BARRACUDA_1_0_5_OR_NEWER"
+        }
+    ],
+    "noEngineReferences": false
+}

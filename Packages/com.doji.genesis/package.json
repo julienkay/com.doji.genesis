@@ -1,0 +1,17 @@
+{
+   "name": "com.doji.genesis",
+   "version": "1.0.0",
+   "displayName": "Genesis",
+   "description": "An AI-powered world building and prototyping tool.",
+   "author":
+   {
+      "name": "Doji Technologies",
+      "email": "support@doji-tech.com",
+      "url": "https://www.doji-tech.com/"
+   },
+   "unity": "2019.4",
+   "type": "library",
+   "documentationUrl": "https://www.doji-tech.com/genesis-docs",
+   "samples":
+   []
+}

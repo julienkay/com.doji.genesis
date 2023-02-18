@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.doji.genesis": {
+      "version": "file:com.doji.genesis",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.barracuda": {
       "version": "2.1.0-preview",
       "depth": 1,
