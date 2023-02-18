@@ -1,4 +1,4 @@
-Shader "AssetForger/EquirectDepth" {
+Shader "Genesis/EquirectDepth" {
     Properties {
         _MainTex ("Texture", 2D) = "white" {}
         _Depth("Depth", 2D) = "white" {}

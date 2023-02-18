@@ -64,14 +64,14 @@ Material:
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
-    - _DepthMultiplier: 0.067
+    - _DepthMultiplier: 0.778
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _LogNorm: 1.55
-    - _Max: 9514
+    - _Max: 769
     - _Metallic: 0
     - _Min: 0
     - _Mode: 0

@@ -1,14 +1,17 @@
 using System;
-using System.Collections;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
-using AssetForger.Utilities;
-using static AssetForger.Utilities.UrlUtility;
-using static AssetForger.Utilities.WebRequestAsyncUtility;
+using Genesis.Utilities;
+using static Genesis.Utilities.UrlUtility;
+using static Genesis.Utilities.WebRequestAsyncUtility;
 using UnityEngine.Networking;
 
-namespace AssetForger {
+namespace Genesis {
+
+    /// <summary>
+    /// An interface to Skybox Lab from Blockade Labs.
+    /// </summary>
     public class AssetForge : MonoBehaviour {
 
         public static AssetForge Instance {
@@ -22,7 +25,7 @@ namespace AssetForger {
         }
         private static AssetForge _instance;
 
-        private static readonly string BASE_URL = "https://assetforger.blockadelabs.com/api/skybox/";
+        private static readonly string BASE_URL = "https://Genesis.blockadelabs.com/api/skybox/";
 
         private static readonly string GENERATE_SKYBOX_URL = BASE_URL + "generateSkyboxImage";
         private static readonly string GET_SKYBOX_URL      = BASE_URL + "getSkyboxImage";

@@ -1,4 +1,4 @@
-﻿namespace AssetForger {
+﻿namespace Genesis {
 
     public enum PromptType { 
         FantasyLandscape,

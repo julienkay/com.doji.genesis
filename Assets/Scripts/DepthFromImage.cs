@@ -1,12 +1,13 @@
 #define _CHANNEL_SWAP
 using System;
+using System.Linq;
 using Unity.Barracuda;
 using Unity.Mathematics;
 using UnityEngine;
 using static UnchartedLimbo.NN.Depth.DepthMesher;
 using static Unity.Barracuda.BarracudaTextureUtils;
 
-namespace AssetForger {
+namespace Genesis {
     public class DepthFromImage : IDisposable {
         public static NNModel MiDaSv2 {
             get {
@@ -150,11 +151,12 @@ namespace AssetForger {
 
             //TensorToRenderTexture(to, _output, fromChannel: 0);
             to.ToRenderTexture(_output, fromChannel: 0);
-            /*
+            
             var data = to.data.SharedAccess(out var o);
-            minDepth = data.Min();
-            maxDepth = data.Max();
-            */
+            float minDepth = data.Min();
+            float maxDepth = data.Max();
+            Debug.Log(minDepth);
+            Debug.Log(maxDepth);
 
             to?.Dispose();
         }

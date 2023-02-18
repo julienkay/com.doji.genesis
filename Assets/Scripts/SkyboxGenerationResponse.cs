@@ -1,6 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json;
-namespace AssetForger {
+namespace Genesis {
     public partial class SkyboxGenerationResponse {
         [JsonProperty("message")]
         public string Message { get; set; }

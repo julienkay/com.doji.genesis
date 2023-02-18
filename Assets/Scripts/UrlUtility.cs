@@ -1,4 +1,4 @@
-﻿namespace AssetForger.Utilities {
+﻿namespace Genesis.Utilities {
     /// <summary>
     /// Small helper functions when implementing a framework in Unity that
     /// helps the developer access a web API using HTTP Requests and such.

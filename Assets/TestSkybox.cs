@@ -1,7 +1,6 @@
 using UnityEngine;
 
-namespace AssetForger {
-
+namespace Genesis {
 
     public class TestSkybox : MonoBehaviour {
 
@@ -27,6 +26,11 @@ namespace AssetForger {
             Texture depth = _depthFromImage.GenerateDepth(TestImage);
             In = _depthFromImage._input;
             renderer.sharedMaterial.SetTexture("_Depth", depth);
+
+            // "disable" frustum culling
+            MeshFilter meshFilter = GetComponent<MeshFilter>();
+            meshFilter.sharedMesh.bounds = new Bounds(transform.position, Vector3.one * float.MaxValue);
+
             _depthFromImage.SetProperties(renderer.sharedMaterial);
         }
 

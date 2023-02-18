@@ -5,7 +5,7 @@ using System;
 using System.Threading.Tasks;
 using System.Text;
 
-namespace AssetForger.Utilities {
+namespace Genesis.Utilities {
 
     public enum HTTPVerb { GET, POST };
 
