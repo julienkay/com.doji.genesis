@@ -25,7 +25,7 @@ namespace Genesis {
         }
         private static AssetForge _instance;
 
-        private static readonly string BASE_URL = "https://Genesis.blockadelabs.com/api/skybox/";
+        private static readonly string BASE_URL = "https://assetforger.blockadelabs.com/api/skybox/";
 
         private static readonly string GENERATE_SKYBOX_URL = BASE_URL + "generateSkyboxImage";
         private static readonly string GET_SKYBOX_URL      = BASE_URL + "getSkyboxImage";
