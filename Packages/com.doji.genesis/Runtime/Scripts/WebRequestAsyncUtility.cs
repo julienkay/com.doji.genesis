@@ -10,12 +10,15 @@ namespace Genesis.Utilities {
     public enum HTTPVerb { GET, POST };
 
     public struct Result<T> {
+
         public T Value;
         public string Error;
+        public long ReponseCode;
 
-        public Result(T value, string error) {
+        public Result(T value, string error, long responseCode) {
             Value = value;
             Error = error;
+            ReponseCode = responseCode;
         }
     }
 
@@ -40,6 +43,7 @@ namespace Genesis.Utilities {
                     while (!asyncOp.webRequest.isDone) {
                         await Task.Yield();
                     }
+                    result.ReponseCode = asyncOp.webRequest.responseCode;
 
                     switch (asyncOp.webRequest.result) {
                         case UnityWebRequest.Result.InProgress:

@@ -1,6 +1,9 @@
-﻿namespace Genesis {
+﻿using Newtonsoft.Json;
+using System;
 
-    public enum PromptType { 
+namespace Genesis {
+
+    public enum PromptType {
         FantasyLandscape,
         AnimeArtStyle,
         SurealStyle,
@@ -23,7 +26,7 @@
             _type = type;
         }
 
-        public string CreatePromptString() {
+        private string CreatePromptString() {
             string prompt = ToFormattableString(_type);
             return string.Format(prompt, _query);
         }
@@ -52,6 +55,23 @@
                     return "(VR360) {0} (VR360)";
                 default:
                     return "{0}";
+            }
+        }
+        public class PromptConverter : JsonConverter {
+            public override bool CanConvert(Type objectType) {
+                return objectType == typeof(SkyboxPrompt);
+            }
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
+                throw new NotImplementedException();
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
+                var prompt = (SkyboxPrompt)value;
+
+                writer.WriteStartObject();
+                writer.WritePropertyName("prompt");
+                serializer.Serialize(writer, prompt.CreatePromptString());
             }
         }
     }
