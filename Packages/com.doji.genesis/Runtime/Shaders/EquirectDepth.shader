@@ -56,9 +56,8 @@ Shader "Genesis/EquirectDepth" {
                 UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-                // Newer versions of Barracuda mess up the X and Y directions. Therefore the UV has to be swapped
                 float2 uv = v.uv.yx;
-                uv.x = 1 - uv.x;
+                uv.x = 1 - uv.x; //
                 // Vertex displacement (assumes unit sphere with radius 1)
                 float depth = clamp(_Max- tex2Dlod(_Depth, float4(uv, 0, 0)), 0, _Max);
                 o.vertex = UnityObjectToClipPos(v.vertex * depth * _DepthMultiplier);
@@ -74,10 +73,9 @@ Shader "Genesis/EquirectDepth" {
 
             fixed4 frag (v2f i) : SV_Target {
                 float4 col;
-                // The color texture is sampled normally, so we have to flip the coordinates back
-                float2 uv = lerp(i.uv, float2(1 - i.uv.y, 1 - i.uv.x), _SwapChannels);
 
-                col = tex2D(_MainTex, uv);
+                i.uv.x = 1 - i.uv.x;
+                col = tex2D(_MainTex, i.uv);
                 return col;
             }
             ENDCG

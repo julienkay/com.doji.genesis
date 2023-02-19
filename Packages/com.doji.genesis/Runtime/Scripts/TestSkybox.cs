@@ -25,6 +25,7 @@ namespace Genesis {
 
             Texture depth = _depthFromImage.GenerateDepth(TestImage);
             In = _depthFromImage._input;
+            renderer.sharedMaterial.SetTexture("_MainTex", TestImage);
             renderer.sharedMaterial.SetTexture("_Depth", depth);
 
             // "disable" frustum culling
