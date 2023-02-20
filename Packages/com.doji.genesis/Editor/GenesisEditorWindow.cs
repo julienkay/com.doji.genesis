@@ -13,48 +13,69 @@ using static Genesis.Editor.IOUtils;
 namespace Genesis.Editor {
 
     public partial class GenesisEditorWindow : EditorWindow {
-
-
-        [MenuItem("Window/Genesis/ &g", true, 0)]
+    
+        [MenuItem("Genesis/ &g", true, 0)]
         protected static bool ValidateGenesisEditor() {
             return true;
         }
 
-        [MenuItem("Window/WiX/Genesis Editor &g", false, 0)]
-        public static void OpenEditorWIndow() {
+        [MenuItem("Genesis/Genesis Editor &g", false, 0)]
+        public static void OpenEditorWindow() {
             var window = GetWindow<GenesisEditorWindow>(false, SR.DefaultWindowHeader, true);
             window.minSize = new Vector2(350f, 600f);
         }
 
-        private string _prompt;
+        /*[MenuItem("Genesis/Import From Skybox Lab via ID", false, 0)]
+        public static void ImportViaID() {
 
+        }*/
+
+        private string _prompt;
+        private Vector2 _promptScrollPos = Vector2.zero;
+        private PromptType _promptType;
 
         private void OnGUI() {
             GUI.SetNextControlName(string.Empty);
 
-            EditorGUILayout.BeginVertical();
+            EditorGUILayout.BeginVertical(new GUIStyle() { padding = new RectOffset(10, 10, 10, 10) });
+
 
             DrawPromptField();
-            DrawGenerateButton();
+            DrawButtons();
 
             DrawSkyboxLibrary();
 
             GUILayout.EndVertical();
         }
 
-        private void DrawSkyboxLibrary() {
-
-        }
+        private void DrawSkyboxLibrary() { }
 
         private void DrawPromptField() {
-            _prompt = GUILayout.TextArea(_prompt, GUILayout.Height(80));
+            EditorGUILayout.PrefixLabel("Prompt");
+            _promptScrollPos = EditorGUILayout.BeginScrollView(_promptScrollPos, GUILayout.Height(100));
+
+            _prompt = GUILayout.TextArea(_prompt, Styles.PromptTextArea, GUILayout.ExpandHeight(true));
+
+            EditorGUILayout.EndScrollView();
+        }
+
+        private void DrawButtons() {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            DrawGenerateButton();
+            DrawPromptOptions();
+            EditorGUILayout.EndHorizontal();
         }
 
         private void DrawGenerateButton() {
             // generate from prompt
             if (GUILayout.Button(SR.GenerateButton, GUILayout.Width(150))) {
-                GenerateSkybox(new SkyboxPrompt("idyllic forest, the sun casts lightshafts through the translucent leaves, the bounced lights paint the scene in green and yellow, fireflies scatter light through the low fog, a path leads north", PromptType.Scenic));
+                GenerateSkybox(new SkyboxPrompt(_prompt, _promptType));
             }
+        }
+
+        private void DrawPromptOptions() {
+            _promptType = (PromptType)EditorGUILayout.EnumPopup(_promptType, GUILayout.Width(130));
         }
 
         public async void GenerateSkybox(SkyboxPrompt prompt) {
