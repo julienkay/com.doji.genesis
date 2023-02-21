@@ -4,7 +4,7 @@
    "displayName": "Genesis",
    "description": "An AI-powered world building and prototyping tool.",
    "dependencies": {
-    "com.unity.barracuda": "2.1.0-preview",
+    "com.unity.barracuda": "3.0.0",
     "com.unity.burst": "1.8.3",
     "com.unity.collections": "1.2.4",
     "com.unity.mathematics": "1.2.1"

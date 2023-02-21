@@ -135,26 +135,24 @@ namespace Genesis {
         private void RunModel(Texture source) {
             using (var tensor = new Tensor(source, 3)) {
                 _engine.Execute(tensor);
-            }
 
-            // In Barracuda 1.0.4 the output of MiDaS can be passed  directly to a texture as it is shaped correctly.
-            // In later versions we have to reshape the tensor. Don't ask why...
+                // In Barracuda 1.0.4 the output of MiDaS can be passed  directly to a texture as it is shaped correctly.
+                // In later versions we have to reshape the tensor. Don't ask why...
 #if BARRACUDA_1_0_5_OR_NEWER
-            var to = _engine.PeekOutput().Reshape(new TensorShape(1, _width, _height, 1));
+                var to = _engine.PeekOutput().Reshape(new TensorShape(1, _width, _height, 1));
 #else
-            var to = _engine.PeekOutput();
+                var to = _engine.PeekOutput();
 #endif
 
-            //TensorToRenderTexture(to, _output, fromChannel: 0);
-            to.ToRenderTexture(_output, fromChannel: 0);
-            
-            var data = to.data.SharedAccess(out var o);
-            float minDepth = data.Min();
-            float maxDepth = data.Max();
-            Debug.Log(minDepth);
-            Debug.Log(maxDepth);
+                //TensorToRenderTexture(to, _output, fromChannel: 0);
+                to.ToRenderTexture(_output, fromChannel: 0);
 
-            to?.Dispose();
+                var data = to.data.SharedAccess(out var o);
+                /*float minDepth = data.Min();
+                float maxDepth = data.Max();
+                Debug.Log(minDepth);
+                Debug.Log(maxDepth);*/
+            }
         }
 
         public void Dispose() {
