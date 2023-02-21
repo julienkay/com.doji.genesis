@@ -2,10 +2,8 @@ Shader "Genesis/EquirectDepth" {
     Properties {
         _MainTex ("Texture", 2D) = "white" {}
         _Depth("Depth", 2D) = "white" {}
-        _Min("Min Depth", Range(0.0, 10000.0)) = 0.0
-        _Max("Max Depth", Range(0.0, 10000.0)) = 1000.0
-        _DepthMultiplier("Depth Exaggeration", Range(0.0, 1.0)) = 0.01
-        _LogNorm("Log Normalization Factor", Range(0.0, 2.0)) = 1
+        _MinDistance("Min Distance", Range(0.0, 100.0)) = 0.0
+        _MaxDistance("Max Distance", Range(10.0, 10000.0)) = 100.0
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -23,19 +21,14 @@ Shader "Genesis/EquirectDepth" {
             float4 _MainTex_ST;
             sampler2D _Depth;
             
-            // Minimum recorded depth
+            // Minimum predicted inverse depth
             float _Min;
 
-            // Maximum recorded depth
+            // Maximum predicted inverse depth
             float _Max;
 
-            // Depth Exaggeration
-            float _DepthMultiplier;
-
-            // Log-Normalization factor
-            float _LogNorm;
-
-            int _SwapChannels;
+            float _MinDistance;
+            float _MaxDistance;
 
             struct appdata {
                 float4 vertex : POSITION;
@@ -56,11 +49,17 @@ Shader "Genesis/EquirectDepth" {
                 UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-                float2 uv = v.uv.yx;
-                uv.x = 1 - uv.x; //
+                float2 uv = v.uv.yx; // flip needed because of how Barracuda outputs data
+                uv.x = 1 - uv.x;     // invert x because we use an outward-facing sphere with 'Cull Front'
+                
+                float depth = tex2Dlod(_Depth, float4(uv, 0, 0));
+
+                //noramlize to range [0, 1] and go from MiDaS' reversed depth to depth
+                float normalizedDepth = 1.0 - saturate((depth - _Min) / (_Max - _Min));
+
                 // Vertex displacement (assumes unit sphere with radius 1)
-                float depth = clamp(_Max- tex2Dlod(_Depth, float4(uv, 0, 0)), 0, _Max);
-                o.vertex = UnityObjectToClipPos(v.vertex * depth * _DepthMultiplier);
+                depth = (normalizedDepth * _MaxDistance) + _MinDistance;
+                o.vertex = UnityObjectToClipPos(v.vertex * depth);
 
                 // clamp to far clip plane (assumes reversed-Z)
                 if (o.vertex.z < 1.0e-3f) {

@@ -4,7 +4,7 @@ using Unity.Barracuda;
 using UnityEngine;
 
 namespace Genesis {
-    public class DepthFromImage : IDisposable {
+    public class DepthEstimator : IDisposable {
         public static NNModel MiDaSv2 {
             get {
                 if (_MiDaSv2 == null) {
@@ -20,17 +20,12 @@ namespace Genesis {
         public RenderTexture _input, _output;
         private int _width, _height;
 
-        // Shader Properties
-        private static readonly int Min = Shader.PropertyToID("_Min");
-        private static readonly int Max = Shader.PropertyToID("_Max");
-        private static readonly int MainTex = Shader.PropertyToID("_MainTex");
-        private static readonly int Displace = Shader.PropertyToID("_Displace");
-        private static readonly int DepthMultiplier = Shader.PropertyToID("_DepthMultiplier");
-        private static readonly int LogNorm = Shader.PropertyToID("_LogNorm");
-        private static readonly int ColorIsDepth = Shader.PropertyToID("_ColorIsDepth");
-        private static readonly int DepthTex = Shader.PropertyToID("_DepthTex");
+        private float _minDepth, _maxDepth;
 
-        public DepthFromImage() {
+        // Shader Properties
+        private static readonly int _minShaderProp = Shader.PropertyToID("_Min");
+        private static readonly int _maxShaderProp = Shader.PropertyToID("_Max");
+        public DepthEstimator() {
             InitializeNetwork();
         }
 
@@ -67,6 +62,8 @@ namespace Genesis {
             mat.SetInt("_SwapChannels", 0);
 #endif
 
+            mat.SetFloat(_minShaderProp, _minDepth);
+            mat.SetFloat(_maxShaderProp, _maxDepth);
         }
 
         /// <summary>
@@ -148,10 +145,12 @@ namespace Genesis {
                 to.ToRenderTexture(_output, fromChannel: 0);
 
                 var data = to.data.SharedAccess(out var o);
-                /*float minDepth = data.Min();
-                float maxDepth = data.Max();
-                Debug.Log(minDepth);
-                Debug.Log(maxDepth);*/
+                _minDepth = ((float[])data).Min();
+                _maxDepth = ((float[])data).Max();
+                Debug.Log(_minDepth);
+                Debug.Log(_maxDepth);
+
+                to?.Dispose();
             }
         }
 

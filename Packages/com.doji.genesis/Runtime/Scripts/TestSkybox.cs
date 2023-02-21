@@ -7,7 +7,7 @@ namespace Genesis {
         public string _prompt;
         public PromptType _type;
 
-        private DepthFromImage _depthFromImage;
+        private DepthEstimator _depthEstimator;
 
         public Texture2D TestImage;
 
@@ -15,7 +15,7 @@ namespace Genesis {
         public RenderTexture Out;
 
         private void Start() {
-            _depthFromImage = new DepthFromImage();
+            _depthEstimator = new DepthEstimator();
 
             SkyboxPrompt prompt = new SkyboxPrompt(_prompt, _type);
             //var skyBox = await AssetForge.Instance.GenerateSkybox(prompt);
@@ -23,16 +23,16 @@ namespace Genesis {
             var renderer = GetComponent<MeshRenderer>();
             //renderer.sharedMaterial.mainTexture = skyBox;
 
-            Texture depth = _depthFromImage.GenerateDepth(TestImage);
-            In = _depthFromImage._input;
-            renderer.sharedMaterial.SetTexture("_MainTex", TestImage);
-            renderer.sharedMaterial.SetTexture("_Depth", depth);
+            Texture depth = _depthEstimator.GenerateDepth(TestImage);
+            In = _depthEstimator._input;
+            renderer.material.SetTexture("_MainTex", TestImage);
+            renderer.material.SetTexture("_Depth", depth);
 
             // "disable" frustum culling
             MeshFilter meshFilter = GetComponent<MeshFilter>();
             meshFilter.sharedMesh.bounds = new Bounds(transform.position, Vector3.one * float.MaxValue);
 
-            _depthFromImage.SetProperties(renderer.sharedMaterial);
+            _depthEstimator.SetProperties(renderer.sharedMaterial);
         }
 
         // Update is called once per frame
@@ -41,8 +41,8 @@ namespace Genesis {
         }
 
         private void OnDestroy() {
-            if (_depthFromImage != null) {
-                _depthFromImage.Dispose();
+            if (_depthEstimator != null) {
+                _depthEstimator.Dispose();
             }
         }
     }
