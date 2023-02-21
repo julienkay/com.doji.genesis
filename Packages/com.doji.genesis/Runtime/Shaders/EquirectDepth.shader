@@ -2,8 +2,8 @@ Shader "Genesis/EquirectDepth" {
     Properties {
         _MainTex ("Texture", 2D) = "white" {}
         _Depth("Depth", 2D) = "white" {}
-        _MinDistance("Min Distance", Range(0.0, 100.0)) = 0.0
-        _MaxDistance("Max Distance", Range(10.0, 10000.0)) = 100.0
+        _MinDepth("Min Depth", Range(0.0, 100.0)) = 2.0
+        _MaxDepth("Max Depth", Range(10.0, 10000.0)) = 100.0
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -20,15 +20,9 @@ Shader "Genesis/EquirectDepth" {
             sampler2D _MainTex;
             float4 _MainTex_ST;
             sampler2D _Depth;
-            
-            // Minimum predicted inverse depth
-            float _Min;
 
-            // Maximum predicted inverse depth
-            float _Max;
-
-            float _MinDistance;
-            float _MaxDistance;
+            float _MinDepth;
+            float _MaxDepth;
 
             struct appdata {
                 float4 vertex : POSITION;
@@ -54,11 +48,10 @@ Shader "Genesis/EquirectDepth" {
                 
                 float depth = tex2Dlod(_Depth, float4(uv, 0, 0));
 
-                //noramlize to range [0, 1] and go from MiDaS' reversed depth to depth
-                float normalizedDepth = 1.0 - saturate((depth - _Min) / (_Max - _Min));
+                // assume normalized depth, map to a given min, max range
+                depth = (depth * _MaxDepth) + _MinDepth;
 
-                // Vertex displacement (assumes unit sphere with radius 1)
-                depth = (normalizedDepth * _MaxDistance) + _MinDistance;
+                // Vertex displacement (assumes rendering on a unit sphere with radius 1)
                 o.vertex = UnityObjectToClipPos(v.vertex * depth);
 
                 // clamp to far clip plane (assumes reversed-Z)

@@ -1,14 +1,9 @@
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Threading.Tasks;
 using UnityEditor;
-using UnityEditor.PackageManager.UI;
 using UnityEngine;
-using UnityEngine.Profiling.Memory.Experimental;
 using static Genesis.Editor.IOUtils;
+using static Genesis.Editor.DepthSkyboxPrefabUtility;
+using System.Linq;
 
 namespace Genesis.Editor {
 
@@ -24,11 +19,6 @@ namespace Genesis.Editor {
             var window = GetWindow<GenesisEditorWindow>(false, SR.DefaultWindowHeader, true);
             window.minSize = new Vector2(350f, 600f);
         }
-
-        /*[MenuItem("Genesis/Import From Skybox Lab via ID", false, 0)]
-        public static void ImportViaID() {
-
-        }*/
 
         private string _prompt;
         private Vector2 _promptScrollPos = Vector2.zero;
@@ -87,10 +77,9 @@ namespace Genesis.Editor {
                 return;
             }
 
-            string assetPath = Path.Combine(StagingAreaPath, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}_{gen.Id}");
-            Directory.CreateDirectory(assetPath);
-
-            SkyboxAsset skybox = CreateSkyboxAsset(assetPath, gen.Id);
+#if UNITY_EDITOR
+            Debug.Log($"Generating skybox {gen.Id}");
+#endif
 
             // wait for result
             SkyboxImageResponse img = await AssetForge.Instance.WaitForSkyboxGeneration(gen.Id);
@@ -100,57 +89,15 @@ namespace Genesis.Editor {
             if (img == null) {
                 return;
             }
-
-            // download skybox and save inside project ass png
-            var textureAsset = await DownloadSkyboxById(assetPath, img.Id);
-
-            // update Skybox asset metadata
-            skybox.TextureAsset = textureAsset;
-            skybox.Title = img.Title;
-            skybox.FileUrl = img.FileUrl;
-            skybox.ThumbUrl = img.ThumbUrl;
+            string name = GetSafeFileName(img.Title);
+            await CreateSkyboxAsset(gen.Id, name);
         }
 
-        /// <summary>
-        /// Creates a new object holding only the ID of the skybox to be generated so far.
-        /// </summary>
-        private SkyboxAsset CreateSkyboxAsset(string assetPath, string id) {
-            SkyboxAsset skyboxAsset = CreateInstance<SkyboxAsset>();
-            // path has to start at "Assets"
-            string path = Path.Combine(assetPath, $"{id}.asset");
-            AssetDatabase.CreateAsset(skyboxAsset, path);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+        private string GetSafeFileName(string name) {
+           char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
 
-            return skyboxAsset;
-        }
-
-        /// <summary>
-        /// Downloads a skybox by its ID and saves it inside the project as a .png file.
-        /// This method assumes that the generation has already completed and that the
-        /// skybox is available on the server and returns null otherwise.
-        /// </summary>
-        private async Task<Texture2D> DownloadSkyboxById(string assetPath, string id) {
-            int progressId = Progress.Start($"Downloading skybox{id}", "Your Skybox is being downloaded...");
-
-            // download the skybox 
-            Texture2D skybox = await AssetForge.Instance.GetSkyboxById(id);
-            if (skybox == null) {
-                Progress.Remove(progressId);
-                return null;
-            }
-
-            string imageFile = Path.Combine(assetPath, $"{id}.png");
-            File.WriteAllBytes(imageFile, skybox.EncodeToPNG());
-            DestroyImmediate(skybox);
-
-            //TODO: Modify Texture import settings (4k resolution, Trilinear filtering, ..)
-            AssetDatabase.Refresh();
-            Texture2D skyboxTextureAsset = AssetDatabase.LoadAssetAtPath<Texture2D>(imageFile);
-
-            Progress.Remove(progressId);
-
-            return skyboxTextureAsset;
+            // Builds a string out of valid chars
+            return new string(name.Where(ch => !invalidFileNameChars.Contains(ch)).ToArray());
         }
     }
 }

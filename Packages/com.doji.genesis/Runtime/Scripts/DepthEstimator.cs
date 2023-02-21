@@ -20,11 +20,13 @@ namespace Genesis {
         public RenderTexture _input, _output;
         private int _width, _height;
 
-        private float _minDepth, _maxDepth;
+        private float MinDepth { get; set; }
+        private float MaxDepth { get; set; }
 
         // Shader Properties
         private static readonly int _minShaderProp = Shader.PropertyToID("_Min");
         private static readonly int _maxShaderProp = Shader.PropertyToID("_Max");
+
         public DepthEstimator() {
             InitializeNetwork();
         }
@@ -44,11 +46,6 @@ namespace Genesis {
 
             RunModel(_input);
 
-            //OnImageResized.Invoke(inputTexture.height / (float)inputTexture.width);
-            //OnDepthSolved.Invoke(_output);
-
-            //DeallocateObjects();
-
             return _output;
         }
 
@@ -62,8 +59,8 @@ namespace Genesis {
             mat.SetInt("_SwapChannels", 0);
 #endif
 
-            mat.SetFloat(_minShaderProp, _minDepth);
-            mat.SetFloat(_maxShaderProp, _maxDepth);
+            mat.SetFloat(_minShaderProp, MinDepth);
+            mat.SetFloat(_maxShaderProp, MaxDepth);
         }
 
         /// <summary>
@@ -90,6 +87,26 @@ namespace Genesis {
             _width = _model.inputs[0].shape[1];
             _height = _model.inputs[0].shape[2];
 #endif
+        }
+
+        public Texture2D GetNormalizedDepth() {
+            RenderTexture depth = _output;
+            Texture2D depthTexture = new Texture2D(depth.width, depth.height, TextureFormat.RFloat, false);
+            RenderTexture.active = depth;
+            depthTexture.ReadPixels(new Rect(0, 0, depth.width, depth.height), 0, 0);
+            RenderTexture.active = null;
+
+            //noramlize to range [0, 1] and convert from MiDaS' reversed depth to depth
+            var depthData = depthTexture.GetPixelData<float>(0);
+            float min = MinDepth;
+            float max = MaxDepth;
+            for (int i = 0; i < depthData.Length; i++) {
+                float depthValue = depthData[i];
+                float normalizedDepth = 1.0f - Mathf.Clamp01((depthValue - min) / (max - min));
+                depthData[i] = normalizedDepth;
+            }
+            depthTexture.Apply(false);
+            return depthTexture;
         }
 
         /// <summary>
@@ -145,10 +162,10 @@ namespace Genesis {
                 to.ToRenderTexture(_output, fromChannel: 0);
 
                 var data = to.data.SharedAccess(out var o);
-                _minDepth = ((float[])data).Min();
-                _maxDepth = ((float[])data).Max();
-                Debug.Log(_minDepth);
-                Debug.Log(_maxDepth);
+                MinDepth = ((float[])data).Min();
+                MaxDepth = ((float[])data).Max();
+                Debug.Log(MinDepth);
+                Debug.Log(MaxDepth);
 
                 to?.Dispose();
             }
@@ -157,6 +174,7 @@ namespace Genesis {
         public void Dispose() {
             _engine?.Dispose();
             _engine = null;
+            DeallocateObjects();
         }
     }
 }
