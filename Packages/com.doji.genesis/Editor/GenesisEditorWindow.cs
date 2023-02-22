@@ -9,7 +9,7 @@ namespace Genesis.Editor {
 
     public partial class GenesisEditorWindow : EditorWindow {
     
-        [MenuItem("Genesis/ &g", true, 0)]
+        /*[MenuItem("Genesis/Genesis Editor &g", true, 0)]
         protected static bool ValidateGenesisEditor() {
             return true;
         }
@@ -18,7 +18,7 @@ namespace Genesis.Editor {
         public static void OpenEditorWindow() {
             var window = GetWindow<GenesisEditorWindow>(false, SR.DefaultWindowHeader, true);
             window.minSize = new Vector2(350f, 600f);
-        }
+        }*/
 
         private string _prompt;
         private Vector2 _promptScrollPos = Vector2.zero;

@@ -19,23 +19,14 @@ namespace Genesis.Editor {
 
         [MenuItem("Genesis/Import equirectangular panorama from disk", false, 0)]
         public static void ImportViaPath() {
-            string path = EditorUtility.OpenFilePanel("Select panorama", "", "png");
+            string[] filter = new string[] { "Image files", "png,jpg,jpeg", "All files", "*" };
+            string path = EditorUtility.OpenFilePanelWithFilters("Select panorama", "", filter);
 
             if (string.IsNullOrEmpty(path)) {
                 return;
             }
 
-            byte[] data = File.ReadAllBytes(path);
-            Texture2D tex = new Texture2D(1, 1);
-
-            ImageConversion.LoadImage(tex, data);
-
-            if (tex.width != tex.height * 2) {
-                EditorUtility.DisplayDialog("Unsupported format", "This asset requires a panoramic image in equirectangular projection with an aspect ratio of 2:1.", "OK");
-                return;
-            }
-
-            throw new System.NotImplementedException();
+            CreateSkyboxAsset(path);
         }
 
         private string _id;
