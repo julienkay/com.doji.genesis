@@ -8,7 +8,6 @@ Shader "Genesis/EquirectDepth" {
     SubShader {
         Tags { "RenderType"="Opaque" }
         LOD 100
-        Cull Front
 
         Pass {
             CGPROGRAM
