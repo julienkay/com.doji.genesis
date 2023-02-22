@@ -18,6 +18,13 @@ namespace Genesis {
             get {
                 if (_instance == null) {
                     _instance = FindObjectOfType<AssetForge>();
+#if UNITY_EDITOR
+                    if (_instance == null) {
+                        GameObject g = new GameObject();
+                        g.name = nameof(AssetForge);
+                        _instance = g.AddComponent<AssetForge>();
+                    }
+#endif
                 }
                 return _instance;
             }
