@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using static Genesis.Editor.DepthSkyboxPrefabUtility;
 using System.Linq;
+using SR = Genesis.Editor.StringResources;
 
 namespace Genesis.Editor {
 

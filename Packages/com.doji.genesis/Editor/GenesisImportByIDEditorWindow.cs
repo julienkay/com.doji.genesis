@@ -1,8 +1,5 @@
-using System.IO;
-using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
-using static Genesis.Editor.IOUtils;
 using static Genesis.Editor.DepthSkyboxPrefabUtility;
 
 namespace Genesis.Editor {
