@@ -3,10 +3,11 @@
 Experimental package that auto-generates depth textures for skyboxes created with [Skybox Lab](https://skybox.blockadelabs.com/).
 
 ## Disclaimer
-As of right now, this project's main purpose is experimentation. Feel free to try it out, but expect things to break.
+As of right now, this project's main purpose is experimentation. Feel free to give it a go with your own imaginations (but expect things to break).
 
-I have a feeling that the approach produces more impressive results for outdoor scenes.
-There are also some non-realistic images where depth estimation can fail badly.
+The image-based rendering techniques used here do not do any sophisticated inpainting techniques. The depth estimation still has a lot of limitations and artifacts (outlined below). How well it performs also depends highly on the content (e.g. indoor vs outdoor scenes). Especially when generating highly non-realistic images, depth estimation can fail badly.
+
+The motivation here in some way is to see how far you can push current 2D-based Image generation models for building 3D worlds and prototype workflows for the inevitable future of AI-assisted game development.
 
 You're welcome to provide feedback here on GitHub, [Twitter](https://twitter.com/julien_kaye), or join the discussion on the [Blockade Labs Discord](https://discord.gg/kqKB3X4TJz)
 
