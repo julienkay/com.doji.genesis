@@ -27,6 +27,8 @@ public class ImportLeiaPixDepthEditorWindow : EditorWindow {
 
     private static Texture2D NormalizeDepth(Texture2D tex) {
         Texture2D normalizedDepthTex = new Texture2D(tex.width, tex.height, TextureFormat.RFloat, mipChain: false, linear: true);
+        normalizedDepthTex.wrapModeU = TextureWrapMode.Repeat;
+        normalizedDepthTex.wrapModeV = TextureWrapMode.Clamp;
         var targetDepthData = normalizedDepthTex.GetPixelData<float>(0);
         var depthData = tex.GetPixelData<byte>(0);
         Debug.Log(targetDepthData.Length);

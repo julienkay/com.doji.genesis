@@ -43,11 +43,11 @@ Shader "Genesis/EquirectDepth" {
                 UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-                float2 uv = v.uv.yx; // flip needed because of how Barracuda outputs data
-                uv.x = 1 - uv.x;     // invert x because we use an outward-facing sphere with 'Cull Front'
+                // mirror x because we render on the inside of a sphere
+                v.uv.x = 1 - v.uv.x;
                 
-                float depth = tex2Dlod(_Depth, float4(uv, 0, 0));
-                depth = _Scale / (depth);
+                float depth = tex2Dlod(_Depth, float4(v.uv, 0, 0));
+                depth = _Scale / depth;
                 depth = clamp(depth, 0, _Max * _Scale);
 
                 // Vertex displacement (assumes rendering on a unit sphere with radius 1)
@@ -64,8 +64,6 @@ Shader "Genesis/EquirectDepth" {
 
             fixed4 frag (v2f i) : SV_Target {
                 float4 col;
-
-                i.uv.x = 1 - i.uv.x;
                 col = tex2D(_MainTex, i.uv);
                 return col;
             }

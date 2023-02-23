@@ -24,6 +24,8 @@ namespace Genesis {
         public float MinDepth { get; private set; }
         public float MaxDepth { get; private set; }
 
+        private Material _rotateMat = new Material(Shader.Find("Hidden/BlitRotateMirror"));
+
         public DepthEstimator() {
             InitializeNetwork();
         }
@@ -43,7 +45,20 @@ namespace Genesis {
 
             RunModel(_input);
 
+            // Newer versions of Barracuda mess up the X and Y directions.
+            // So we rotate the output here, so we don't have to mess with
+            // swapping the UV in the shader and all other processing steps.
+            RotateAndMirrorOutput();
+
             return _output;
+        }
+
+        private void RotateAndMirrorOutput() {
+            RenderTexture rotated = RenderTexture.GetTemporary(_output.descriptor);
+
+            Graphics.Blit(_output, rotated, _rotateMat);
+            _output.Release();
+            _output = rotated;
         }
 
         /// <summary>
@@ -81,8 +96,8 @@ namespace Genesis {
         public Texture2D PostProcessDepth() {
             RenderTexture depth = _output;
             Texture2D depthTexture = new Texture2D(depth.width, depth.height, TextureFormat.RFloat, mipChain: false, linear: true);
-            depthTexture.wrapModeU = TextureWrapMode.Clamp;
-            depthTexture.wrapModeV = TextureWrapMode.Repeat;
+            depthTexture.wrapModeU = TextureWrapMode.Repeat;
+            depthTexture.wrapModeV = TextureWrapMode.Clamp;
             RenderTexture.active = depth;
             depthTexture.ReadPixels(new Rect(0, 0, depth.width, depth.height), 0, 0);
             RenderTexture.active = null;
