@@ -21,11 +21,9 @@ The package is a 'Hybrid Package', so it will install into your Packages folder 
 - Go to https://skybox.blockadelabs.com/ to generate a new panorama.
 - Use the menu *Genesis -> Import from Skybox Lab via ID*, enter the ID and hit *Import*
 
-On the generated prefab, there is a material that has two properties *MinDistance* and *MaxDistance*. The depth estimation does not give information about absolute depth. So you can use these sliders to get the scale right.
-Good values for a realistic scale of the scene depends on the contents of the image.
-For *MinDistance* ask yourself: "How far away is the closest surface in this image?" Maybe look below and try to guess how far you are above the ground.
-For *MaxDistance* equally ask yourself: How far away is the furthest surface in this image? For outdoor scenes, this value will be much higher than for interior scenes.
-*MaxDistance* should alwas be greater than *MinDistance*
+On the generated prefab, there is a material that has two properties *Depth Multiplier* and *Max Depth Cutoff*.
+- The depth estimation does not give information about absolute depth. So you can use the *Depth Multiplier* to get the scale right, but you can also just scale the Unity object normally. Good values for a realistic scale of the scene depend on the contents of the image.
+- *Max Depth Cutoff* you'll probably rarely have to touch, but it clamps any larger depth values to that number. It is sometimes needed to remove artifacts when very high depth values appear in the estimation. Other than that you can use it to simply bring far away surfaces in closer.
 
 ## Ideas
 Not a roadmap, just some general thoughts and ideas I have for the future.
