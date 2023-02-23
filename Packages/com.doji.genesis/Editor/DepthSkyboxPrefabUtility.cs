@@ -26,7 +26,7 @@ namespace Genesis.Editor {
         /// Downloads skybox from Skybox Lab, generates depth and creates a prefab for a DepthSkybox.
         /// </summary>
         public static async Task CreateSkyboxAsset(string id, string name) {
-            string assetPath = Path.Combine(StagingAreaPath, $"{name}");
+            string assetPath = Path.Combine(StagingAreaPath, $"{id}");
             Directory.CreateDirectory(assetPath);
 
             string imageFile = Path.Combine(assetPath, $"{name}_rgb.png");
@@ -43,7 +43,7 @@ namespace Genesis.Editor {
             var depthTexture = depthEstimator.GetNormalizedDepth();
 
             string depthTextureFile = Path.Combine(assetPath, $"{name}_depth.asset");
-            AssetDatabase.CreateAsset(depthTexture, depthTextureFile);
+            CreateAsset(depthTexture, depthTextureFile);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
@@ -52,6 +52,18 @@ namespace Genesis.Editor {
 
             depthEstimator.Dispose();
             Progress.Remove(progressId);
+        }
+
+        /// <summary>
+        /// Creates the given asset and overwrites any existing asset with the same name
+        /// </summary>
+        private static void CreateAsset(Object obj, string path) {
+            var existing = AssetDatabase.LoadAssetAtPath(path, obj.GetType());
+            if (existing != null) {
+                AssetDatabase.DeleteAsset(path);
+            }
+
+            AssetDatabase.CreateAsset(obj, path);
         }
 
         public static void CreateSkyboxPrefab(string assetPath, string name) {
@@ -72,9 +84,13 @@ namespace Genesis.Editor {
             m.SetTexture("_Depth", skyboxDepth);
 
             string materialPath = Path.Combine(assetPath, $"{name}_material.mat");
-            AssetDatabase.CreateAsset(m, materialPath);
+            CreateAsset(m, materialPath);
 
             string prefabPath = Path.Combine(assetPath, $"{name}.prefab");
+            var existing = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (existing != null) {
+                AssetDatabase.DeleteAsset(prefabPath);
+            }
             GameObject variant = PrefabUtility.SaveAsPrefabAsset(instance, prefabPath);
             Object.DestroyImmediate(instance);
 
