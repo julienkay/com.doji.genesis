@@ -11,7 +11,7 @@ There are also some non-realistic images where depth estimation can fail badly.
 You're welcome to provide feedback here on GitHub, [Twitter](https://twitter.com/julien_kaye), or join the discussion on the [Blockade Labs Discord](https://discord.gg/kqKB3X4TJz)
 
 ## Requirements
-This package was created with Unity 2021.3
+This package was created with Unity 2021.3 and uses the Built-in Render Pipeline.
 
 ## Installation
 Go to the [release section](https://github.com/julienkay/genesis/releases), download the Unity Package, and import it into any Unity project.
