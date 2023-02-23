@@ -9,7 +9,7 @@ namespace Genesis.Editor {
     public static class DepthSkyboxPrefabUtility {
 
         /// <summary>
-        /// Imput given png fileb, generates depth and creates a prefab for a DepthSkybox.
+        /// Given an input png file, generates depth and creates a prefab for a DepthSkybox.
         /// </summary>
         public static void CreateSkyboxAsset(string pngFilePath) {
             string name = Path.GetFileNameWithoutExtension(pngFilePath);
@@ -18,8 +18,8 @@ namespace Genesis.Editor {
 
             string pngTargetPath = Path.Combine(assetPath, $"{name}_rgb.png");
             Texture2D skybox = ImportImageFile(pngFilePath, pngTargetPath);
-            GenerateDepth(assetPath, name, skybox);
-            CreateSkyboxPrefab(assetPath, name);
+            var range = GenerateDepth(assetPath, name, skybox);
+            CreateSkyboxPrefab(assetPath, name, range);
         }
 
         /// <summary>
@@ -31,27 +31,31 @@ namespace Genesis.Editor {
 
             string imageFile = Path.Combine(assetPath, $"{name}_rgb.png");
             Texture2D skybox = await DownloadSkyboxById(imageFile, id);
-            GenerateDepth(assetPath, name, skybox);
-            CreateSkyboxPrefab(assetPath, name);
+            var range = GenerateDepth(assetPath, name, skybox);
+            CreateSkyboxPrefab(assetPath, name, range);
         }
 
-        private static void GenerateDepth(string assetPath, string name, Texture2D skybox) {
+        private static Vector2 GenerateDepth(string assetPath, string name, Texture2D skybox) {
             int progressId = Progress.Start("Generating depth texture", "Generating a depth texture from skybox...");
 
             DepthEstimator depthEstimator = new DepthEstimator();
             depthEstimator.GenerateDepth(skybox);
-            var depthTexture = depthEstimator.GetNormalizedDepth();
+            var depthTexture = depthEstimator.PostProcessDepth();
 
             string depthTextureFile = Path.Combine(assetPath, $"{name}_depth.asset");
             CreateAsset(depthTexture, depthTextureFile);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
 
-            // for some reason, saving out as exr or png and reimporting produces 
+            // for some reason, saving out as exr or png and reimporting produces what looks like precision artifacts
             //byte[] bytes = depthTexture.EncodeToEXR(Texture2D.EXRFlags.OutputAsFloat);
 
             depthEstimator.Dispose();
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
             Progress.Remove(progressId);
+
+            return new Vector2(depthEstimator.MinDepth, depthEstimator.MaxDepth);
         }
 
         /// <summary>
@@ -66,7 +70,9 @@ namespace Genesis.Editor {
             AssetDatabase.CreateAsset(obj, path);
         }
 
-        public static void CreateSkyboxPrefab(string assetPath, string name) {
+        public static void CreateSkyboxPrefab(string assetPath, string name, Vector2 range) {
+            int progressId = Progress.Start("Creating skybox assets", "Your skybox assets are being created...");
+
             GameObject skyboxPrefab = (GameObject)Resources.Load("Prefabs/DepthSkybox");
 
             GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(skyboxPrefab);
@@ -82,6 +88,8 @@ namespace Genesis.Editor {
             renderer.sharedMaterial = m;
             m.SetTexture("_MainTex", skybox);
             m.SetTexture("_Depth", skyboxDepth);
+            m.SetFloat("_Min", range.x);
+            m.SetFloat("_Max", range.y);
 
             string materialPath = Path.Combine(assetPath, $"{name}_material.mat");
             CreateAsset(m, materialPath);
@@ -93,8 +101,12 @@ namespace Genesis.Editor {
             }
             GameObject variant = PrefabUtility.SaveAsPrefabAsset(instance, prefabPath);
             Object.DestroyImmediate(instance);
-
             PrefabUtility.InstantiatePrefab(variant);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Progress.Remove(progressId);
         }
 
         /// <summary>

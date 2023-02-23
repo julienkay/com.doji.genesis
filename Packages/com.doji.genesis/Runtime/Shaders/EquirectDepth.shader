@@ -2,8 +2,8 @@ Shader "Genesis/EquirectDepth" {
     Properties {
         _MainTex ("Texture", 2D) = "white" {}
         _Depth("Depth", 2D) = "white" {}
-        _MinDepth("Min Depth", Range(0.0, 100.0)) = 2.0
-        _MaxDepth("Max Depth", Range(10.0, 10000.0)) = 100.0
+        _Scale("Depth Multiplier", float) = 1
+        _Max("Max Depth Cutoff", float) = 1000
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -20,8 +20,9 @@ Shader "Genesis/EquirectDepth" {
             float4 _MainTex_ST;
             sampler2D _Depth;
 
-            float _MinDepth;
-            float _MaxDepth;
+            float _Min;
+            float _Max;
+            float _Scale;
 
             struct appdata {
                 float4 vertex : POSITION;
@@ -46,9 +47,8 @@ Shader "Genesis/EquirectDepth" {
                 uv.x = 1 - uv.x;     // invert x because we use an outward-facing sphere with 'Cull Front'
                 
                 float depth = tex2Dlod(_Depth, float4(uv, 0, 0));
-
-                // assume normalized depth, map to a given min, max range
-                depth = (depth * _MaxDepth) + _MinDepth;
+                depth = _Scale / (depth);
+                depth = clamp(depth, 0, _Max * _Scale);
 
                 // Vertex displacement (assumes rendering on a unit sphere with radius 1)
                 o.vertex = UnityObjectToClipPos(v.vertex * depth);

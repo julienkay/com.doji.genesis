@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Unity.Barracuda;
+using Unity.Collections;
 using UnityEngine;
 
 namespace Genesis {
@@ -20,12 +21,8 @@ namespace Genesis {
         public RenderTexture _input, _output;
         private int _width, _height;
 
-        private float MinDepth { get; set; }
-        private float MaxDepth { get; set; }
-
-        // Shader Properties
-        private static readonly int _minShaderProp = Shader.PropertyToID("_Min");
-        private static readonly int _maxShaderProp = Shader.PropertyToID("_Max");
+        public float MinDepth { get; private set; }
+        public float MaxDepth { get; private set; }
 
         public DepthEstimator() {
             InitializeNetwork();
@@ -47,20 +44,6 @@ namespace Genesis {
             RunModel(_input);
 
             return _output;
-        }
-
-        public void SetProperties(Material mat) {
-            // In Barracuda 1.0.4 the output of MiDaS can be passed  directly to a texture as it is shaped correctly.
-            // In later versions we have to swap X and Y axes, and also flip the X axis...
-            // We need to inform the shader of this change.
-#if BARRACUDA_1_0_5_OR_NEWER
-            mat.SetInt("_SwapChannels", 1);
-#else
-            mat.SetInt("_SwapChannels", 0);
-#endif
-
-            mat.SetFloat(_minShaderProp, MinDepth);
-            mat.SetFloat(_maxShaderProp, MaxDepth);
         }
 
         /// <summary>
@@ -89,24 +72,39 @@ namespace Genesis {
 #endif
         }
 
-        public Texture2D GetNormalizedDepth() {
+        /// <summary>
+        /// Do some post processing of the depth texture to
+        /// - fix depth discontinuities / seams
+        /// - fix distortions at the poles
+        /// - normalize depth values
+        /// </summary>
+        public Texture2D PostProcessDepth() {
             RenderTexture depth = _output;
-            Texture2D depthTexture = new Texture2D(depth.width, depth.height, TextureFormat.RFloat, false);
+            Texture2D depthTexture = new Texture2D(depth.width, depth.height, TextureFormat.RFloat, mipChain: false, linear: true);
+            depthTexture.wrapModeU = TextureWrapMode.Clamp;
+            depthTexture.wrapModeV = TextureWrapMode.Repeat;
             RenderTexture.active = depth;
             depthTexture.ReadPixels(new Rect(0, 0, depth.width, depth.height), 0, 0);
             RenderTexture.active = null;
 
-            //noramlize to range [0, 1] and convert from MiDaS' reversed depth to depth
             var depthData = depthTexture.GetPixelData<float>(0);
-            float min = MinDepth;
-            float max = MaxDepth;
-            for (int i = 0; i < depthData.Length; i++) {
-                float depthValue = depthData[i];
-                float normalizedDepth = 1.0f - Mathf.Clamp01((depthValue - min) / (max - min));
-                depthData[i] = normalizedDepth;
-            }
+
+            NormalizeDepth(depthData);
+
             depthTexture.Apply(false);
             return depthTexture;
+        }
+
+        /// <summary>
+        /// Makes sure all values of the depth texture are in the [0, 1] range
+        /// and converts from MiDaS' reversed depth to depth.
+        /// </summary>
+        private void NormalizeDepth(NativeArray<float> depthData) {
+            for (int i = 0; i < depthData.Length; i++) {
+                float depth = depthData[i];
+                float normalizedDepth = Mathf.Clamp01((depth - MinDepth) / (MaxDepth - MinDepth));
+                depthData[i] = normalizedDepth;
+            }
         }
 
         /// <summary>
@@ -124,7 +122,7 @@ namespace Genesis {
 
             // Declare texture resources
             _input = RenderTexture.GetTemporary(_width, _height, 0, RenderTextureFormat.ARGB32);
-            _output = RenderTexture.GetTemporary(_width, _height, 0, RenderTextureFormat.RFloat);
+            _output = RenderTexture.GetTemporary(_width, _height, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
         }
 
         /// <summary>
