@@ -41,7 +41,7 @@ namespace Genesis.Editor {
         }
         private string _name;
 
-        void OnGUI() {
+        private void OnGUI() {
             EditorGUILayout.LabelField("Enter ID here: ", GUILayout.Width(80));
             _id = EditorGUILayout.TextField( _id);
             EditorGUILayout.LabelField("Asset name (Optional): ", GUILayout.Width(160));

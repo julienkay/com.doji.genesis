@@ -1,7 +1,6 @@
 using System.IO;
 using UnityEditor;
 using UnityEngine;
-using static Genesis.Editor.IOUtils;
 using static Genesis.Editor.DepthSkyboxPrefabUtility;
 using System.Linq;
 
