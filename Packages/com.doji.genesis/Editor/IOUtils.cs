@@ -3,7 +3,7 @@
 namespace Genesis.Editor {
     internal class IOUtils {
 
-        private static readonly string StagingAreaFolder = @"Assets\Genesis Assets\";
+        private static readonly string StagingAreaFolder = Path.Combine("Assets", "Genesis Assets");
         public static string StagingAreaPath {
             get {
                 if (!Directory.Exists(StagingAreaFolder)) {
