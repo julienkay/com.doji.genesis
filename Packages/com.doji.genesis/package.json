@@ -7,7 +7,8 @@
     "com.unity.barracuda": "3.0.0",
     "com.unity.burst": "1.8.3",
     "com.unity.collections": "1.2.4",
-    "com.unity.mathematics": "1.2.1"
+    "com.unity.mathematics": "1.2.1",
+    "com.unity.nuget.newtonsoft-json": "3.0.2"
    },
    "author":
    {
