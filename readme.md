@@ -19,8 +19,8 @@ Go to the [release section](https://github.com/julienkay/genesis/releases), down
 The package is a 'Hybrid Package', so it will install into your Packages folder as a local package.
 
 ## Usage
-- Go to https://skybox.blockadelabs.com/ to generate a new panorama.
-- Use the menu *Genesis -> Import from Skybox Lab via ID*, enter the ID and hit *Import*
+- Go to https://skybox.blockadelabs.com/ to generate a new skybox. Use the 'Share' Button to get a link with the ID.
+- Back in Unity, use the menu *Genesis -> Import from Skybox Lab via ID*, enter the ID and hit *Import*
 
 On the generated prefab, there is a material that has two properties *Depth Multiplier* and *Max Depth Cutoff*.
 - The depth estimation does not give information about absolute depth. So you can use the *Depth Multiplier* to get the scale right, but you can also just scale the Unity object normally. Good values for a realistic scale of the scene depend on the contents of the image.
