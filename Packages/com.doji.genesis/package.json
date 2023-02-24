@@ -1,6 +1,6 @@
 {
    "name": "com.doji.genesis",
-   "version": "0.1.1",
+   "version": "0.1.2",
    "displayName": "Genesis",
    "description": "An AI-powered world building and prototyping tool.",
    "dependencies": {
