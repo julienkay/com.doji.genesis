@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class ImportLeiaPixDepthEditorWindow : EditorWindow {
 
-    [MenuItem("Genesis/Import depth from LeiaPix", false, 4)]
-    /*public static void ImportViaPath() {
+    /*[MenuItem("Genesis/Import depth from LeiaPix", false, 4)]
+    public static void ImportViaPath() {
         string[] filter = new string[] { "Image files", "jpg", "All files", "*" };
         string path = EditorUtility.OpenFilePanelWithFilters("Select depth image", "", filter);
 
