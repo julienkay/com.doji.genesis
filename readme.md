@@ -2,6 +2,8 @@
 
 Experimental package that auto-generates depth textures for skyboxes created with [Skybox Lab](https://skybox.blockadelabs.com/).
 
+https://user-images.githubusercontent.com/26555424/221649787-1bf45ce8-4c71-4647-a9be-c02128687d2a.mp4
+
 ## Disclaimer
 As of right now, this project's main purpose is experimentation. Feel free to give it a go with your own imaginations (but expect things to break).
 
