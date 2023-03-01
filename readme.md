@@ -14,7 +14,7 @@ The motivation here in some way is to see how far you can push current 2D-based 
 You're welcome to provide feedback here on GitHub, [Twitter](https://twitter.com/julien_kaye), or join the discussion on the [Blockade Labs Discord](https://discord.gg/kqKB3X4TJz)
 
 ## Requirements
-This package was created with Unity 2021.3 and uses the Built-in Render Pipeline.
+This package requires Unity 2020 or newer and uses the Built-in Render Pipeline.
 
 ## Installation
 Go to the [release section](https://github.com/julienkay/genesis/releases), download the Unity Package, and import it into any Unity project.
