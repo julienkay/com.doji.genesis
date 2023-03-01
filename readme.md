@@ -1,6 +1,6 @@
 # Genesis
 
-Experimental package that auto-generates depth textures for skyboxes created with [Skybox Lab](https://skybox.blockadelabs.com/).
+Experimental Unity package that auto-generates depth textures for skyboxes created with [Skybox Lab](https://skybox.blockadelabs.com/).
 
 https://user-images.githubusercontent.com/26555424/221649787-1bf45ce8-4c71-4647-a9be-c02128687d2a.mp4
 
@@ -21,10 +21,14 @@ Go to the [release section](https://github.com/julienkay/genesis/releases), down
 The package is a 'Hybrid Package', so it will install into your Packages folder as a local package.
 
 ## Usage
-- Go to https://skybox.blockadelabs.com/ to generate a new skybox. Use the 'Share' Button to get a link with the ID.
+- Generate a skybox using [SkyboxLabs](https://skybox.blockadelabs.com/). Use the 'Share' Button to get a link with the ID.
 - Back in Unity, use the menu *Genesis -> Import from Skybox Lab via ID*, enter the ID and hit *Import*
 
-On the generated prefab, there is a material that has two properties *Depth Multiplier* and *Max Depth Cutoff*.
+![menu_crop](https://user-images.githubusercontent.com/26555424/222116668-8b705af4-6674-4225-9664-f6313b1a72c2.png)
+
+On the generated prefab, there is a material that has two properties: *Depth Multiplier* and *Max Depth Cutoff*
+![skybox_material](https://user-images.githubusercontent.com/26555424/222119231-f8d8b2c6-5bf7-40a9-b8bc-378e677853ce.jpg)
+
 - The depth estimation does not give information about absolute depth. So you can use the *Depth Multiplier* to get the scale right, but you can also just scale the Unity object normally. Good values for a realistic scale of the scene depend on the contents of the image.
 - *Max Depth Cutoff* you'll probably rarely have to touch, but it clamps any larger depth values to that number. It is sometimes needed to remove artifacts when very high depth values appear in the estimation. Other than that you can use it to simply bring far away surfaces in closer.
 
