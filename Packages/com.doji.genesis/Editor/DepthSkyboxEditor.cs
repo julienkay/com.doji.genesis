@@ -1,3 +1,4 @@
+using System;
 using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
@@ -20,7 +21,7 @@ namespace Genesis.Editor {
 
             if (GUILayout.Button(SR.ExtractMeshButton)) {
                 ExtractMesh();
-            } 
+            }
         }
 
         private void ExtractMesh() {
@@ -46,11 +47,16 @@ namespace Genesis.Editor {
             }
 
             Texture2D depthTex = (Texture2D)meshRenderer.sharedMaterial.GetTexture("_Depth");
+            if (!depthTex.isReadable) {
+                throw new InvalidOperationException($"The texture must be readable. (Check if Read/Write is set in the texture's import settings)");
+            }
+            if (!DepthSampler.IsFormatSupported(depthTex.graphicsFormat)) {
+                throw new NotSupportedException($"The texture format {depthTex.graphicsFormat} of this depth texture is not supported.");
+            }
+            IDepthSampler sampler = DepthSampler.Get(depthTex);
+
             float scale = meshRenderer.sharedMaterial.GetFloat("_Scale");
             float max = meshRenderer.sharedMaterial.GetFloat("_Max");
-            Debug.Log(scale);
-            Debug.Log(max);
-            var depthData = depthTex.GetPixelData<float>(0);
             Mesh mesh = meshFilter.sharedMesh;
             Mesh extracted;
             NativeArray<Vector3> vertices = new NativeArray<Vector3>(mesh.vertexCount, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
@@ -66,10 +72,8 @@ namespace Genesis.Editor {
                 Vector2 uv = uvs[i];
                 uv.x = 1 - uv.x;
                 uvs[i] = uv;
-                (uv.x, uv.y) = (uv.y, uv.x);
 
-                //float depth = depthData[i];
-                float depth = SampleBilinear(depthData, uv, depthTex.width, depthTex.height);
+                float depth = sampler.SampleBilinear(uv);
                 depth = scale / depth;
                 depth = Mathf.Clamp(depth, 0, max * scale);
                 vertices[i] = vertices[i] * depth;
