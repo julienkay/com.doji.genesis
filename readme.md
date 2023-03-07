@@ -17,11 +17,11 @@ You're welcome to provide feedback here on GitHub, [Twitter](https://twitter.com
 This package requires Unity 2020 or newer and uses the Built-in Render Pipeline.
 
 ## Installation
-Go to the [release section](https://github.com/julienkay/genesis/releases), download the Unity Package, and import it into any Unity project.
+Go to the [releases section](https://github.com/julienkay/genesis/releases), download the Unity Package, and import it into any Unity project.
 The package is a 'Hybrid Package', so it will install into your Packages folder as a local package.
 
 ## Usage
-- Generate a skybox using [SkyboxLabs](https://skybox.blockadelabs.com/). Use the 'Share' Button to get a link with the ID.
+- Generate a skybox using SkyboxLabs(https://skybox.blockadelabs.com/). Use the 'Share' Button to get a link with the ID.
 - Back in Unity, use the menu *Genesis -> Import from Skybox Lab via ID*, enter the ID and hit *Import*
 
 ![menu_crop](https://user-images.githubusercontent.com/26555424/222116668-8b705af4-6674-4225-9664-f6313b1a72c2.png)
