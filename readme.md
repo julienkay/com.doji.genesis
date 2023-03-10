@@ -17,7 +17,7 @@ You're welcome to provide feedback here on GitHub, [Twitter](https://twitter.com
 This package requires Unity 2020 or newer and uses the Built-in Render Pipeline.
 
 ## Installation
-Go to the [releases section](https://github.com/julienkay/genesis/releases), download the Unity Package, and import it into any Unity project.
+Go to the [releases section](https://github.com/julienkay/genesis/releases/latest), download the Unity Package, and import it into any Unity project.
 The package is a 'Hybrid Package', so it will install into your Packages folder as a local package.
 
 ## Usage
