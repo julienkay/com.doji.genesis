@@ -24,7 +24,7 @@ The package is a 'Hybrid Package', so it will install into your Packages folder 
 - Generate a skybox using SkyboxLabs(https://skybox.blockadelabs.com/). Use the 'Download' Button to save the file to your comnputer.
 - Back in Unity, use the menu *Genesis -> Import equirectangular panorama from disk*, select the downloaded file and hit *Open*
 
-![menu_crop](https://user-images.githubusercontent.com/26555424/222116668-8b705af4-6674-4225-9664-f6313b1a72c2.png)
+![menu_crop_2](https://user-images.githubusercontent.com/26555424/228353960-5bfa01a7-e514-422c-af0d-0d9b864be4d7.png)
 
 On the generated prefab, there is a material that has two properties: *Depth Multiplier* and *Max Depth Cutoff*
 ![skybox_material](https://user-images.githubusercontent.com/26555424/222119231-f8d8b2c6-5bf7-40a9-b8bc-378e677853ce.jpg)
