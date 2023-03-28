@@ -21,8 +21,8 @@ Go to the [releases section](https://github.com/julienkay/genesis/releases/lates
 The package is a 'Hybrid Package', so it will install into your Packages folder as a local package.
 
 ## Usage
-- Generate a skybox using SkyboxLabs(https://skybox.blockadelabs.com/). Use the 'Share' Button to get a link with the ID.
-- Back in Unity, use the menu *Genesis -> Import from Skybox Lab via ID*, enter the ID and hit *Import*
+- Generate a skybox using SkyboxLabs(https://skybox.blockadelabs.com/). Use the 'Download' Button to save the file to your comnputer.
+- Back in Unity, use the menu *Genesis -> Import equirectangular panorama from disk*, select the downloaded file and hit *Open*
 
 ![menu_crop](https://user-images.githubusercontent.com/26555424/222116668-8b705af4-6674-4225-9664-f6313b1a72c2.png)
 
