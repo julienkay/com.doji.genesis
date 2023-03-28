@@ -9,30 +9,17 @@ namespace Genesis.Editor {
     public static class DepthSkyboxPrefabUtility {
 
         /// <summary>
-        /// Given an input png file, generates depth and creates a prefab for a DepthSkybox.
+        /// Given an input image file, generates depth and creates a prefab for a DepthSkybox.
         /// </summary>
-        public static void CreateSkyboxAsset(string pngFilePath) {
-            string name = Path.GetFileNameWithoutExtension(pngFilePath);
+        public static void CreateSkyboxAsset(string filePath) {
+            string name = Path.GetFileNameWithoutExtension(filePath);
             string assetPath = Path.Combine(StagingAreaPath, $"{name}");
             Directory.CreateDirectory(assetPath);
 
-            string pngTargetPath = Path.Combine(assetPath, $"{name}_rgb.png");
-            Texture2D skybox = ImportImageFile(pngFilePath, pngTargetPath);
+            string targetPath = Path.Combine(assetPath, $"{name}_rgb{Path.GetExtension(filePath)}");
+            Texture2D skybox = ImportImageFile(filePath, targetPath);
             var range = GenerateDepth(assetPath, name, skybox);
-            CreateSkyboxPrefab(assetPath, name, range);
-        }
-
-        /// <summary>
-        /// Downloads skybox from Skybox Lab, generates depth and creates a prefab for a DepthSkybox.
-        /// </summary>
-        public static async Task CreateSkyboxAsset(string id, string name) {
-            string assetPath = Path.Combine(StagingAreaPath, $"{id}");
-            Directory.CreateDirectory(assetPath);
-
-            string imageFile = Path.Combine(assetPath, $"{name}_rgb.png");
-            Texture2D skybox = await DownloadSkyboxById(imageFile, id);
-            var range = GenerateDepth(assetPath, name, skybox);
-            CreateSkyboxPrefab(assetPath, name, range);
+            CreateSkyboxPrefab(skybox, assetPath, name, range);
         }
 
         private static Vector2 GenerateDepth(string assetPath, string name, Texture2D skybox) {
@@ -70,7 +57,7 @@ namespace Genesis.Editor {
             AssetDatabase.CreateAsset(obj, path);
         }
 
-        public static void CreateSkyboxPrefab(string assetPath, string name, Vector2 range) {
+        public static void CreateSkyboxPrefab(Texture2D skybox, string assetPath, string name, Vector2 range) {
             int progressId = Progress.Start("Creating skybox assets", "Your skybox assets are being created...");
 
             GameObject skyboxPrefab = (GameObject)Resources.Load("Prefabs/DepthSkybox");
@@ -78,10 +65,7 @@ namespace Genesis.Editor {
             GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(skyboxPrefab);
             MeshRenderer renderer = instance.GetComponent<MeshRenderer>();
 
-            string skyboxPath = Path.Combine(assetPath, $"{name}_rgb.png");
             string depthPath = Path.Combine(assetPath, $"{name}_depth.asset");
-
-            Texture2D skybox = (Texture2D)AssetDatabase.LoadMainAssetAtPath(skyboxPath);
             Texture2D skyboxDepth = (Texture2D)AssetDatabase.LoadMainAssetAtPath(depthPath);
 
             Material m = new Material(renderer.sharedMaterial);
@@ -109,49 +93,18 @@ namespace Genesis.Editor {
             Progress.Remove(progressId);
         }
 
-        /// <summary>
-        /// Downloads a skybox by its ID and saves it inside the project as a .png file.
-        /// This method assumes that the generation has already completed and that the
-        /// skybox is available on the server and returns null otherwise.
-        /// </summary>
-        private static async Task<Texture2D> DownloadSkyboxById(string path, string id) {
-            int progressId = Progress.Start($"Downloading skybox {id}", "Your skybox is being downloaded...");
-
-            // download the skybox 
-            Texture2D skybox = await AssetForge.Instance.GetSkyboxById(id);
-            if (skybox == null) {
-                Progress.Remove(progressId);
-                return null;
-            }
-
-            File.WriteAllBytes(path, skybox.EncodeToPNG());
-            Object.DestroyImmediate(skybox);
-
-            AssetDatabase.Refresh();
-            Texture2D skyboxTextureAsset = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-
-            TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(path);
-            importer.maxTextureSize = 4096;
-            importer.textureCompression = TextureImporterCompression.CompressedHQ;
-            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
-
-            Progress.Remove(progressId);
-
-            return skyboxTextureAsset;
-        }
-
-        private static Texture2D ImportImageFile(string pngFilePath, string pngTargetPath) {
+        private static Texture2D ImportImageFile(string filePath, string targetPath) {
             int progressId = Progress.Start($"Importing image", "Your panorama is being imported...");
 
-            File.Copy(pngFilePath, pngTargetPath);
+            File.Copy(filePath, targetPath);
 
             AssetDatabase.Refresh();
-            Texture2D skyboxTextureAsset = AssetDatabase.LoadAssetAtPath<Texture2D>(pngTargetPath);
+            Texture2D skyboxTextureAsset = AssetDatabase.LoadAssetAtPath<Texture2D>(targetPath);
 
-            TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(pngTargetPath);
+            TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(targetPath);
             importer.maxTextureSize = 4096;
             importer.textureCompression = TextureImporterCompression.CompressedHQ;
-            AssetDatabase.ImportAsset(pngTargetPath, ImportAssetOptions.ForceUpdate);
+            AssetDatabase.ImportAsset(targetPath, ImportAssetOptions.ForceUpdate);
 
             Progress.Remove(progressId);
 
