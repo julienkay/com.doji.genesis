@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
-- Renoved the option to import skyboxes directly via their ID.
+- Removed the option to import skyboxes directly via their ID.
 
 ## [0.1.3] - 2023-03-07
 

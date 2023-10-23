@@ -1,23 +1,46 @@
 using System;
 using System.Linq;
-using Unity.Barracuda;
+using Unity.Sentis;
 using Unity.Collections;
 using UnityEngine;
 
 namespace Genesis {
-    public class DepthEstimator : IDisposable {
-        public static NNModel MiDaSv2 {
+    public class DepthEstimator {
+        public static Model MiDaSv2 {
             get {
-                if (_MiDaSv2 == null) {
-                    _MiDaSv2 = Resources.Load<NNModel>("ONNX/MiDaS_model-small");
+                if (_MiDaSv2Asset == null) {
+                    _MiDaSv2Asset = Resources.Load<ModelAsset>("ONNX/MiDaS_model-small");
+                }
+                if (_MiDaSv2Asset == null) {
+                    Debug.LogError("MiDaS v2 ONNX model not found.");
+                } else {
+                    _MiDaSv2 = ModelLoader.Load(_MiDaSv2Asset);
                 }
                 return _MiDaSv2;
             } 
         }
-        private static NNModel _MiDaSv2;
+        private static Model _MiDaSv2;
+        private static ModelAsset _MiDaSv2Asset;
 
-        private Model _model;
-        private IWorker _engine;
+        public static Model MiDaSv31 {
+            get {
+                if (_MiDaSv31Asset == null) {
+                    _MiDaSv31Asset = Resources.Load<ModelAsset>("ONNX/dpt_beit_large_512");
+                }
+                if (_MiDaSv31Asset == null) {
+                    Debug.LogError("MiDaS v3.1 ONNX model not found.");
+                } else {
+                    _MiDaSv31 = ModelLoader.Load(_MiDaSv31Asset);
+                }
+                return _MiDaSv31;
+            }
+        }
+        private static Model _MiDaSv31;
+        private static ModelAsset _MiDaSv31Asset;
+
+        private IWorker _worker;
+        ITensorAllocator allocator;
+        Ops ops;
         public RenderTexture _input, _output;
         private int _width, _height;
 
@@ -28,6 +51,12 @@ namespace Genesis {
 
         public DepthEstimator() {
             InitializeNetwork();
+        }
+        private void InitializeNetwork() {
+            Model model = MiDaSv31;
+            _worker = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
+            _width = model.inputs[0].shape[2].value;
+            _height = model.inputs[0].shape[3].value;
         }
 
         public RenderTexture GenerateDepth(Texture2D inputTexture) {
@@ -48,11 +77,11 @@ namespace Genesis {
             // Newer versions of Barracuda mess up the X and Y directions.
             // So we rotate the output here, so we don't have to mess with
             // swapping the UV in the shader and all other processing steps.
-            RotateAndMirrorOutput();
+            //RotateAndMirrorOutput();
 
             return _output;
         }
-
+        
         private void RotateAndMirrorOutput() {
             RenderTexture rotated = RenderTexture.GetTemporary(_output.descriptor);
 
@@ -61,31 +90,6 @@ namespace Genesis {
             _output = rotated;
         }
 
-        /// <summary>
-        /// Loads the <see cref="NNModel"/> asset in memory and creates a Barracuda <see cref="IWorker"/>
-        /// </summary>
-        private void InitializeNetwork() {
-            if (MiDaSv2 == null) {
-                throw new Exception("Could not find NN model.");
-            }
-
-            // Load the model to memory
-            _model = ModelLoader.Load(MiDaSv2);
-
-            // Create a worker
-            _engine = WorkerFactory.CreateWorker(_model, WorkerFactory.Device.GPU);
-
-            // Get Tensor dimensionality ( texture width/height )
-            // In Barracuda 1.0.4 the width and height are in channels 1 & 2.
-            // In later versions in channels 5 & 6
-#if BARRACUDA_1_0_5_OR_NEWER
-            _width  = _model.inputs[0].shape[5];
-            _height = _model.inputs[0].shape[6];
-#else
-            _width = _model.inputs[0].shape[1];
-            _height = _model.inputs[0].shape[2];
-#endif
-        }
 
         /// <summary>
         /// Do some post processing of the depth texture to
@@ -155,38 +159,32 @@ namespace Genesis {
             _output = null;
         }
 
-        /// <summary>
-        /// Performs Inference on the Neural Network Model
-        /// </summary>
-        /// <param name="source"></param>
         private void RunModel(Texture source) {
-            using (var tensor = new Tensor(source, 3)) {
-                _engine.Execute(tensor);
-
-                // In Barracuda 1.0.4 the output of MiDaS can be passed  directly to a texture as it is shaped correctly.
-                // In later versions we have to reshape the tensor. Don't ask why...
-#if BARRACUDA_1_0_5_OR_NEWER
-                var to = _engine.PeekOutput().Reshape(new TensorShape(1, _width, _height, 1));
-#else
-                var to = _engine.PeekOutput();
-#endif
-
-                //TensorToRenderTexture(to, _output, fromChannel: 0);
-                to.ToRenderTexture(_output, fromChannel: 0);
-
-                var data = to.data.SharedAccess(out var o);
-                MinDepth = ((float[])data).Min();
-                MaxDepth = ((float[])data).Max();
-                Debug.Log(MinDepth);
-                Debug.Log(MaxDepth);
-
-                to?.Dispose();
+            using (var tensor = TextureConverter.ToTensor(source, source.width, source.height, 3)) {
+                _worker.Execute(tensor);
             }
+
+            Tensor output = _worker.PeekOutput();
+
+            int height = output.shape[1];
+            int width = output.shape[2];
+
+
+            _output = TextureConverter.ToTexture(output.ShallowReshape(new TensorShape(1, 1, height, width)) as TensorFloat, width, height);
+
+            Ops ops = WorkerFactory.CreateOps(BackendType.GPUCompute, allocator);
+            TensorFloat minT = ops.ReduceMin(output as TensorFloat, null, false);
+            TensorFloat maxT = ops.ReduceMax(output as TensorFloat, null, false);
+            minT.MakeReadable();
+            maxT.MakeReadable();
+            MinDepth = minT[0];
+            MaxDepth = maxT[0];
         }
 
         public void Dispose() {
-            _engine?.Dispose();
-            _engine = null;
+            ops?.Dispose();
+            allocator?.Dispose();
+            _worker?.Dispose();
             DeallocateObjects();
         }
     }
